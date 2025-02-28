@@ -10,7 +10,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             <Image
-              src="/logo.png" // Make sure to add your logo file
+              src="/models/logo.png" // Make sure to add your logo file
               alt="Zbail Cars"
               width={120}
               height={40}
