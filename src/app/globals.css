@@ -143,3 +143,40 @@ html, body {
   margin: 0;
   padding: 0;
 }
+
+/* Add specific Safari mobile fixes */
+@supports (-webkit-touch-callout: none) {
+  .h-screen {
+    height: -webkit-fill-available;
+  }
+  
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+  
+  .h-dynamic {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+  
+  .safari-gap {
+    /* Ensure proper spacing on Safari */
+    gap: 30dvh !important;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Fix height issues on Safari */
+  .min-h-dynamic {
+    min-height: -webkit-fill-available;
+    min-height: 100dvh;
+  }
+}
+
+/* Add specific Safari mobile fixes */
+@media not all and (min-resolution:.001dpcm) { 
+  @supports (-webkit-appearance:none) {
+    .safari-fix {
+      height: -webkit-fill-available;
+    }
+  }
+}

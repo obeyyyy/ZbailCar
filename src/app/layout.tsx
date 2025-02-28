@@ -25,12 +25,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <meta name="description" content="Zbail Cars - Luxury Car Rentals" />
       </head>
-      <body className="h-full overflow-x-hidden">
+      <body className="h-full overflow-x-hidden safari-fix">
         {children}
       </body>
     </html>
