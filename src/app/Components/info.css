@@ -1,22 +1,30 @@
 .badge-container {
   display: inline-block;
-  margin: 0 1rem;
+  margin: 0.5rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+@media (min-width: 640px) {
+  .badge-container {
+    width: auto;
+    margin: 0 1rem;
+  }
 }
 
 .badge {
   position: relative;
-  width: 50vh;
-  height: 180px;
+  width: 100%;
+  height: 80px; /* Reduced height for horizontal layout */
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(5px);
   border-radius: 15px;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center;
-  color: black;
-  font-size: 1.5rem;
+  text-align: left;
+  color: #000000;
+  font-size: 1.25rem;
   font-weight: bold;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -24,7 +32,13 @@
   padding: 1rem;
 }
 
-
+@media (min-width: 640px) {
+  .badge {
+    width: 200px;
+    height: 180px;
+    font-size: 1.5rem;
+  }
+}
 
 .badge span {
   position: absolute;
@@ -102,7 +116,7 @@
   content: "";
   position: absolute;
   z-index: -1;
-  background: #D4AF37;
+  background:black;
   box-shadow: 0 8px 32px 0 rgba(105, 106, 111, 0.37);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
