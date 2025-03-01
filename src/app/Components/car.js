@@ -399,26 +399,65 @@ export default function Car3D() {
     
     if (isMobile) {
       const handleScroll = () => {
-        const scrollPercentage = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-        setScrollProgress(scrollPercentage);
+        // Calculate progress based on viewport heights
+        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const viewportHeight = window.innerHeight;
+        const scrolled = window.scrollY;
         
-        // Update current section based on scroll position
-        const sectionHeight = document.documentElement.scrollHeight / SECTIONS.length;
-        const currentSectionIndex = Math.floor((window.scrollY + sectionHeight / 2) / sectionHeight);
-        currentSection.current = Math.min(currentSectionIndex, SECTIONS.length - 1);
+        // Calculate which section we're in
+        const sectionHeight = viewportHeight;
+        const currentSectionIndex = Math.floor(scrolled / sectionHeight);
+        const sectionProgress = (scrolled % sectionHeight) / sectionHeight;
+        
+        // Map scroll position to animation progress
+        let mappedProgress;
+        if (currentSectionIndex >= SECTIONS.length - 1) {
+          mappedProgress = 1;
+        } else {
+          const sectionStart = SECTIONS[currentSectionIndex]?.progress || 0;
+          const sectionEnd = SECTIONS[currentSectionIndex + 1]?.progress || 1;
+          mappedProgress = sectionStart + (sectionEnd - sectionStart) * sectionProgress;
+        }
+        
+        setScrollProgress(mappedProgress);
+        currentSection.current = currentSectionIndex;
       };
 
-      window.addEventListener('scroll', handleScroll);
+      // Initial call to set correct position
+      handleScroll();
+      window.addEventListener('scroll', handleScroll, { passive: true });
       return () => window.removeEventListener('scroll', handleScroll);
-    } else {
-      // ...existing desktop scroll handling...
     }
+  }, []);
+
+  // Add scroll position tracking for all devices
+  useEffect(() => {
+    const handleScroll = () => {
+      const viewportHeight = window.innerHeight;
+      const scrolled = window.scrollY;
+      const carSectionHeight = viewportHeight * SECTIONS.length;
+      
+      // If we're within the car section
+      if (scrolled <= carSectionHeight) {
+        const carProgress = scrolled / carSectionHeight;
+        setScrollProgress(carProgress);
+        
+        // Update current section based on scroll position
+        const currentSectionIndex = Math.floor((scrolled / carSectionHeight) * SECTIONS.length);
+        currentSection.current = Math.min(currentSectionIndex, SECTIONS.length - 1);
+      }
+    };
+
+    // Initial call to set correct position
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <div ref={containerRef} className={`
       relative
-      ${deviceType === 'mobile' ? 'min-h-[300dvh]' : deviceType === 'tablet' ? 'h-[160dvh]' : 'h-[120vh]'}
+      ${deviceType === 'mobile' ? 'h-[300dvh]' : deviceType === 'tablet' ? 'h-[160dvh]' : 'h-[120vh]'}
       w-screen max-w-[100vw]
     `}>
       {/* Canvas container - Make it fixed on mobile */}

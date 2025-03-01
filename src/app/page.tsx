@@ -8,14 +8,25 @@ import Info from "./Components/info";
 
 function GlobalScrollIndicator() {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isInCarSection, setIsInCarSection] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
       const scrolled = window.scrollY;
-      const progress = Math.min(scrolled / (documentHeight - windowHeight), 1);
-      setScrollProgress(progress);
+      const carSectionHeight = windowHeight * 3; // 3 sections
+
+      // Update progress based on whether we're in car section or not
+      if (scrolled <= carSectionHeight) {
+        setIsInCarSection(true);
+        setScrollProgress(scrolled / carSectionHeight);
+      } else {
+        setIsInCarSection(false);
+        const remainingScroll = scrolled - carSectionHeight;
+        const remainingHeight = documentHeight - carSectionHeight;
+        setScrollProgress((carSectionHeight + remainingScroll) / documentHeight);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
