@@ -393,14 +393,36 @@ export default function Car3D() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  // Add scroll position tracking for mobile
+  useEffect(() => {
+    const isMobile = window.innerWidth < 640;
+    
+    if (isMobile) {
+      const handleScroll = () => {
+        const scrollPercentage = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+        setScrollProgress(scrollPercentage);
+        
+        // Update current section based on scroll position
+        const sectionHeight = document.documentElement.scrollHeight / SECTIONS.length;
+        const currentSectionIndex = Math.floor((window.scrollY + sectionHeight / 2) / sectionHeight);
+        currentSection.current = Math.min(currentSectionIndex, SECTIONS.length - 1);
+      };
+
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    } else {
+      // ...existing desktop scroll handling...
+    }
+  }, []);
+
   return (
     <div ref={containerRef} className={`
       relative
-      ${deviceType === 'mobile' ? 'h-[250vh]' : deviceType === 'tablet' ? 'h-[160vh]' : 'h-[120vh]'}
+      ${deviceType === 'mobile' ? 'min-h-[300dvh]' : deviceType === 'tablet' ? 'h-[160dvh]' : 'h-[120vh]'}
       w-screen max-w-[100vw]
     `}>
-      {/* Canvas container with adjusted height */}
-      <div className="absolute inset-0 w-full h-full z-0 ">
+      {/* Canvas container - Make it fixed on mobile */}
+      <div className={`${deviceType === 'mobile' ? 'fixed' : 'absolute'} inset-0 w-full h-full z-0`}>
         <Canvas
           shadows="soft"
           dpr={[1, 2]}
