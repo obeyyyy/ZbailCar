@@ -98,12 +98,12 @@ body {
 /* Mobile-specific adjustments */
 @media (max-width: 640px) {
   .canvas-container {
-    height: 100dvh;
+    height: 100%;
   }
   
   body {
     overflow-x: hidden;
-    touch-action: pan-y;
+    overflow-y: scroll;
   }
 }
 

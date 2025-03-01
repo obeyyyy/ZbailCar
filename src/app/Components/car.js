@@ -242,6 +242,66 @@ export default function Car3D() {
     requestAnimationFrame(animate);
   };
 
+  const handleWheel = (e) => {
+    if (animating.current) {
+      e.preventDefault();
+      return;
+    }
+
+    // Only handle wheel events during car animation sections
+    if (currentSection.current < SECTIONS.length) {
+      accumulatedDelta += e.deltaY;
+
+      if (Math.abs(accumulatedDelta) >= scrollThreshold) {
+        const direction = accumulatedDelta > 0 ? 1 : -1;
+        const nextSection = currentSection.current + direction;
+        
+        // Allow scrolling between sections
+        if (nextSection >= 0 && nextSection < SECTIONS.length) {
+          e.preventDefault();
+          scrollToSection(nextSection);
+        }
+        
+        // Enable normal scroll when going past last section
+        if (nextSection >= SECTIONS.length && direction > 0) {
+          enablePageScroll();
+        }
+        
+        accumulatedDelta = 0;
+      }
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (animating.current) {
+      e.preventDefault();
+      return;
+    }
+
+    const currentY = e.touches[0].clientY;
+    const delta = touchStartY - currentY;
+    touchAccumulated += delta;
+    touchStartY = currentY;
+
+    // Only handle touch events during car animation sections
+    if (currentSection.current < SECTIONS.length && Math.abs(touchAccumulated) >= scrollThreshold) {
+      const direction = touchAccumulated > 0 ? 1 : -1;
+      const nextSection = currentSection.current + direction;
+      
+      if (nextSection >= 0 && nextSection < SECTIONS.length) {
+        e.preventDefault();
+        scrollToSection(nextSection);
+      }
+      
+      // Enable normal scroll when going past last section
+      if (nextSection >= SECTIONS.length && direction > 0) {
+        enablePageScroll();
+      }
+      
+      touchAccumulated = 0;
+    }
+  };
+
   useEffect(() => {
     // Initially lock scroll
     document.body.style.overflow = 'hidden';
@@ -388,17 +448,32 @@ export default function Car3D() {
     };
   }, []);
 
+  // Update the scroll handler to enable bi-directional scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY === 0) {
+        // When at the top, re-enable car section scrolling
+        document.body.style.overflow = 'hidden';
+        currentSection.current = 0;
+        setScrollProgress(0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Modify the container height for mobile
   return (
     <div ref={containerRef} className={`
       relative
-      ${deviceType === 'mobile' ? 'h-[300dvh]' : deviceType === 'tablet' ? 'h-[160dvh]' : 'h-[120vh]'}
+      ${deviceType === 'mobile' ? 'h-[150dvh]' : deviceType === 'tablet' ? 'h-[160dvh]' : 'h-[120vh]'}
       w-screen max-w-[100vw]
     `}>
       {/* Canvas with fixed position on mobile */}
       <div className={`
-        ${deviceType === 'mobile' ? 'fixed' : 'absolute'} 
-        inset-0 w-full h-full z-0
+        ${deviceType === 'mobile' ? 'fixed h-[50dvh]' : 'absolute h-full'} 
+        inset-0 w-full z-0
       `}>
         <Canvas
   r        shadows="soft"
@@ -407,7 +482,7 @@ export default function Car3D() {
           gl={{ powerPreference: "high-performance", antialias: false }}
           style={{ 
             width: '100%', 
-            height: deviceType === 'mobile' ? '100dvh' : '100%',
+            height: '100%'
           }}
         >
           <color attach="background" args={['#000000']} />
@@ -454,20 +529,20 @@ export default function Car3D() {
 
       {/* Adjust text container for mobile */}
       <div className={`
-        ${deviceType === 'mobile' ? 'absolute' : ''}
+        ${deviceType === 'mobile' ? 'relative mt-[50dvh]' : 'absolute'} 
         inset-0 z-20 
-        ${deviceType === 'mobile' ? 'mt-[15dvh] pb-[15dvh]' : 'mt-10'}
+        ${deviceType === 'mobile' ? 'mt-[15dvh] pb-[15dvh] ' : 'mt-10'}
       `}>
         <div className={`
           relative h-full flex flex-col
-          ${deviceType === 'mobile' ? 'justify-start gap-[60dvh]' : 'justify-start pt-24'}
+          ${deviceType === 'mobile' ? 'gap-[10dvh]' : 'justify-start pt-24'}
           px-2 sm:px-8 lg:px-12
         `}>
           <div className={`
             w-full flex flex-col
-            ${deviceType === 'desktop' ? 'gap-[20vh]' : 'gap-[40vh]'}
+            ${deviceType === 'mobile' ? 'gap-[15dvh]' : 'gap-[25vh]'}
             ${deviceType === 'tablet' ? 'gap-[35vh]' : ''}
-            ${deviceType === 'mobile' ? 'items-center text-center gap-[30vh]' : ''}
+            ${deviceType === 'mobile' ? 'items-center text-center gap-[20vh]' : ''}
           `}>
             {SECTIONS.map((section, index) => (
               <div 

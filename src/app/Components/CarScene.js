@@ -11,40 +11,36 @@ export default function CarScene() {
   const { viewport } = useThree()
   const isMobile = viewport.width < 5
   const deviceType = isMobile ? 'mobile' : 'desktop'
-  const currentProgress = useRef(0)
+  const progressRef = useRef(0)
 
   useFrame((state) => {
-    // Calculate normalized scroll progress (0 to 1)
-    const scrollOffset = scroll.offset
-    currentProgress.current = scrollOffset
-
-    // Calculate which section we're in and the progress within that section
-    let sectionIndex = 0
+    // Get normalized scroll offset (0 to 1)
+    const offsetY = window.scrollY
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+    const scrollFraction = Math.min(offsetY / maxScroll, 1)
+    
+    // Map scroll progress to animation sections
+    let currentSection = 0
     for (let i = 0; i < SECTIONS.length; i++) {
-      if (scrollOffset >= SECTIONS[i].progress) {
-        sectionIndex = i
+      if (scrollFraction >= SECTIONS[i].progress) {
+        currentSection = i
       }
     }
 
-    // Map the overall scroll progress to the car animation progress
-    let mappedProgress
-    if (sectionIndex >= SECTIONS.length - 1) {
-      mappedProgress = 1
-    } else {
-      const sectionStart = SECTIONS[sectionIndex].progress
-      const sectionEnd = SECTIONS[sectionIndex + 1]?.progress || 1
-      const sectionProgress = (scrollOffset - sectionStart) / (sectionEnd - sectionStart)
-      mappedProgress = sectionStart + sectionProgress * (sectionEnd - sectionStart)
-    }
-
-    return mappedProgress
+    // Calculate progress within current section
+    const sectionStart = SECTIONS[currentSection].progress
+    const sectionEnd = SECTIONS[currentSection + 1]?.progress ?? 1
+    const sectionProgress = (scrollFraction - sectionStart) / (sectionEnd - sectionStart)
+    
+    // Update progress ref
+    progressRef.current = Math.min(Math.max(scrollFraction, 0), 1)
   })
 
   return (
     <group>
       <Suspense fallback={null}>
         <CarModel 
-          scrollProgress={currentProgress.current}
+          scrollProgress={progressRef.current}
           deviceType={deviceType}
         />
         <Environment preset="forest" />
