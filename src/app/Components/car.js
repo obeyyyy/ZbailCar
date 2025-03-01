@@ -62,18 +62,6 @@ const SECTIONS = [
   }
 ];
 
-function LoadingState() {
-  // A simple fallback that shows while the model loads
-  return (
-    <group position={[0, 0, 4]}>
-      <mesh>
-        <boxGeometry args={[3, 1, 1]} />
-        <meshStandardMaterial color="#B38E3B" metalness={0.8} roughness={0.4} />
-      </mesh>
-    </group>
-  )
-}
-
 function CarModel({ scrollProgress, deviceType }) {
   const group = useRef()
   const { scene } = useGLTF('/models/2022_abt_audi_rs7-r.glb')
@@ -255,18 +243,7 @@ export default function Car3D() {
   };
 
   useEffect(() => {
-    const isMobile = window.innerWidth < 640;
-    
-    // For mobile: don't lock scroll and immediately enable content
-    if (isMobile) {
-      document.body.style.overflow = 'auto';
-      setTimeout(() => {
-        window.dispatchEvent(new Event('carAnimationComplete'));
-      }, 100);
-      return; // Exit early for mobile
-    }
-
-    // Desktop scroll handling
+    // Initially lock scroll
     document.body.style.overflow = 'hidden';
     let accumulatedDelta = 0;
     
@@ -314,20 +291,22 @@ export default function Car3D() {
       e.preventDefault();
       if (animating.current) return;
 
-      const currentY = e.touches[0].clientY;
+      const touch = e.touches[0];
+      const currentY = touch.clientY;
       const delta = touchStartY - currentY;
-      touchAccumulated += delta;
-      touchStartY = currentY;
 
-      if (Math.abs(touchAccumulated) >= scrollThreshold) {
-        const direction = touchAccumulated > 0 ? 1 : -1;
+      // More aggressive threshold for Safari mobile
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      const touchThreshold = isSafari && deviceType === 'mobile' ? 20 : scrollThreshold;
+
+      if (Math.abs(delta) >= touchThreshold) {
+        const direction = delta > 0 ? 1 : -1;
         const nextSection = currentSection.current + direction;
         
         if (nextSection >= 0 && nextSection < SECTIONS.length) {
           scrollToSection(nextSection);
         }
-        
-        touchAccumulated = 0;
+        touchStartY = currentY;
       }
     };
 
@@ -352,8 +331,7 @@ export default function Car3D() {
     }
 
     return () => {
-      // On cleanup, always restore scroll
-      document.body.style.overflow = 'auto';
+      enablePageScroll();
       if (element) {
         element.removeEventListener('wheel', handleWheel);
         element.removeEventListener('touchstart', handleTouchStart);
@@ -393,87 +371,47 @@ export default function Car3D() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Add scroll position tracking for mobile
+  // Add Safari viewport height fix
   useEffect(() => {
-    const isMobile = window.innerWidth < 640;
-    
-    if (isMobile) {
-      const handleScroll = () => {
-        // Calculate progress based on viewport heights
-        const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const viewportHeight = window.innerHeight;
-        const scrolled = window.scrollY;
-        
-        // Calculate which section we're in
-        const sectionHeight = viewportHeight;
-        const currentSectionIndex = Math.floor(scrolled / sectionHeight);
-        const sectionProgress = (scrolled % sectionHeight) / sectionHeight;
-        
-        // Map scroll position to animation progress
-        let mappedProgress;
-        if (currentSectionIndex >= SECTIONS.length - 1) {
-          mappedProgress = 1;
-        } else {
-          const sectionStart = SECTIONS[currentSectionIndex]?.progress || 0;
-          const sectionEnd = SECTIONS[currentSectionIndex + 1]?.progress || 1;
-          mappedProgress = sectionStart + (sectionEnd - sectionStart) * sectionProgress;
-        }
-        
-        setScrollProgress(mappedProgress);
-        currentSection.current = currentSectionIndex;
-      };
-
-      // Initial call to set correct position
-      handleScroll();
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      return () => window.removeEventListener('scroll', handleScroll);
-    }
-  }, []);
-
-  // Add scroll position tracking for all devices
-  useEffect(() => {
-    const handleScroll = () => {
-      const viewportHeight = window.innerHeight;
-      const scrolled = window.scrollY;
-      const carSectionHeight = viewportHeight * SECTIONS.length;
-      
-      // If we're within the car section
-      if (scrolled <= carSectionHeight) {
-        const carProgress = scrolled / carSectionHeight;
-        setScrollProgress(carProgress);
-        
-        // Update current section based on scroll position
-        const currentSectionIndex = Math.floor((scrolled / carSectionHeight) * SECTIONS.length);
-        currentSection.current = Math.min(currentSectionIndex, SECTIONS.length - 1);
-      }
+    const setVH = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
 
-    // Initial call to set correct position
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+
+    return () => {
+      window.removeEventListener('resize', setVH);
+      window.removeEventListener('orientationchange', setVH);
+    };
   }, []);
 
+  // Modify the container height for mobile
   return (
     <div ref={containerRef} className={`
       relative
       ${deviceType === 'mobile' ? 'h-[300dvh]' : deviceType === 'tablet' ? 'h-[160dvh]' : 'h-[120vh]'}
       w-screen max-w-[100vw]
     `}>
-      {/* Canvas container - Make it fixed on mobile */}
-      <div className={`${deviceType === 'mobile' ? 'fixed' : 'absolute'} inset-0 w-full h-full z-0`}>
+      {/* Canvas with fixed position on mobile */}
+      <div className={`
+        ${deviceType === 'mobile' ? 'fixed' : 'absolute'} 
+        inset-0 w-full h-full z-0
+      `}>
         <Canvas
-          shadows="soft"
+  r        shadows="soft"
           dpr={[1, 2]}
           performance={{ min: 0.5 }}
           gl={{ powerPreference: "high-performance", antialias: false }}
           style={{ 
             width: '100%', 
-            height: deviceType === 'desktop' ? '150vh' : '100%'
+            height: deviceType === 'mobile' ? '100dvh' : '100%',
           }}
         >
           <color attach="background" args={['#000000']} />
-          <Suspense fallback={<LoadingState />}>
+          <Suspense fallback={null}>
             <CarModel scrollProgress={scrollProgress} deviceType={deviceType} />
             <Environment preset="forest" />
           </Suspense>
@@ -514,20 +452,22 @@ export default function Car3D() {
         </Canvas>
       </div>
 
-      {/* Text sections with adjusted spacing */}
-      <div className={`absolute inset-0 z-20 mt-10
-         ${deviceType === 'mobile' ?  'mt-[7dvh]':''}
+      {/* Adjust text container for mobile */}
+      <div className={`
+        ${deviceType === 'mobile' ? 'absolute' : ''}
+        inset-0 z-20 
+        ${deviceType === 'mobile' ? 'mt-[15dvh] pb-[15dvh]' : 'mt-10'}
       `}>
         <div className={`
           relative h-full flex flex-col
-          ${deviceType === 'desktop' ? 'justify-start pt-32' : 'justify-start pt-24'}
-          px-4 sm:px-8 lg:px-12
+          ${deviceType === 'mobile' ? 'justify-start gap-[60dvh]' : 'justify-start pt-24'}
+          px-2 sm:px-8 lg:px-12
         `}>
           <div className={`
             w-full flex flex-col
-            ${deviceType === 'desktop' ? 'gap-[25vh]' : 'gap-[60vh]'}
-            ${deviceType === 'tablet' ? 'gap-[45vh]' : ''}
-            ${deviceType === 'mobile' ? 'items-center text-center gap-[40vh]' : ''}
+            ${deviceType === 'desktop' ? 'gap-[20vh]' : 'gap-[40vh]'}
+            ${deviceType === 'tablet' ? 'gap-[35vh]' : ''}
+            ${deviceType === 'mobile' ? 'items-center text-center gap-[30vh]' : ''}
           `}>
             {SECTIONS.map((section, index) => (
               <div 
@@ -583,28 +523,34 @@ export default function Car3D() {
         </div>
       </div>
 
-      {/* Navigation elements - Only show on desktop */}
-      {deviceType !== 'mobile' && (
-        <>
-          <ScrollIndicator progress={scrollProgress} />
-          <div className={`
-            fixed right-4 sm:right-8 z-20 flex gap-3 sm:gap-4
-            ${deviceType === 'desktop' ? 'top-1/2 -translate-y-1/2 flex-col' : 'bottom-12 flex-row justify-center w-full right-0'}
-          `}>
-            {SECTIONS.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => scrollToSection(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  currentSection.current === index 
-                    ? 'bg-[#D4AF37] scale-125' 
-                    : 'bg-gray-500 hover:bg-[#B38E3B]'
-                }`}
-              />
-            ))}
-          </div>
-        </>
-      )}
+      {/* Keep scroll indicator visible on mobile */}
+      <ScrollIndicator 
+        progress={scrollProgress} 
+        className={`
+          fixed left-1/2 transform -translate-x-1/2 z-30
+          ${deviceType === 'mobile' ? 'bottom-4' : 'bottom-12'}
+        `} 
+      />
+
+      {/* Adjust navigation dots position for mobile */}
+      <div className={`
+        fixed right-4 sm:right-8 z-30 flex gap-3 sm:gap-4
+        ${deviceType === 'mobile' 
+          ? 'bottom-4 flex-row justify-center w-full right-0' 
+          : 'top-1/2 -translate-y-1/2 flex-col'}
+      `}>
+        {SECTIONS.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => scrollToSection(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              currentSection.current === index 
+                ? 'bg-[#D4AF37] scale-125' 
+                : 'bg-gray-500 hover:bg-[#B38E3B]'
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 }
