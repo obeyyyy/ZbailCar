@@ -62,6 +62,18 @@ const SECTIONS = [
   }
 ];
 
+function LoadingState() {
+  // A simple fallback that shows while the model loads
+  return (
+    <group position={[0, 0, 4]}>
+      <mesh>
+        <boxGeometry args={[3, 1, 1]} />
+        <meshStandardMaterial color="#B38E3B" metalness={0.8} roughness={0.4} />
+      </mesh>
+    </group>
+  )
+}
+
 function CarModel({ scrollProgress, deviceType }) {
   const group = useRef()
   const { scene } = useGLTF('/models/2022_abt_audi_rs7-r.glb')
@@ -243,11 +255,19 @@ export default function Car3D() {
   };
 
   useEffect(() => {
-    // Initially lock scroll only on non-mobile devices
-    if (window.innerWidth >= 640) {
-      document.body.style.overflow = 'hidden';
-    }
+    const isMobile = window.innerWidth < 640;
     
+    // For mobile: don't lock scroll and immediately enable content
+    if (isMobile) {
+      document.body.style.overflow = 'auto';
+      setTimeout(() => {
+        window.dispatchEvent(new Event('carAnimationComplete'));
+      }, 100);
+      return; // Exit early for mobile
+    }
+
+    // Desktop scroll handling
+    document.body.style.overflow = 'hidden';
     let accumulatedDelta = 0;
     
     const handleWheel = (e) => {
@@ -392,7 +412,7 @@ export default function Car3D() {
           }}
         >
           <color attach="background" args={['#000000']} />
-          <Suspense fallback={null}>
+          <Suspense fallback={<LoadingState />}>
             <CarModel scrollProgress={scrollProgress} deviceType={deviceType} />
             <Environment preset="forest" />
           </Suspense>
@@ -502,31 +522,28 @@ export default function Car3D() {
         </div>
       </div>
 
-      {/* Navigation elements - Highest z-index */}
-      <ScrollIndicator 
-        progress={scrollProgress} 
-        className={`
-          fixed left-1/2 transform -translate-x-1/2 z-20
-          ${deviceType !== 'desktop' ? 'bottom-24' : 'bottom-12'}
-        `} 
-      />
-
-      <div className={`
-        fixed right-4 sm:right-8 z-20 flex gap-3 sm:gap-4
-        ${deviceType === 'desktop' ? 'top-1/2 -translate-y-1/2 flex-col' : 'bottom-12 flex-row justify-center w-full right-0'}
-      `}>
-        {SECTIONS.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => scrollToSection(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              currentSection.current === index 
-                ? 'bg-[#D4AF37] scale-125' 
-                : 'bg-gray-500 hover:bg-[#B38E3B]'
-            }`}
-          />
-        ))}
-      </div>
+      {/* Navigation elements - Only show on desktop */}
+      {deviceType !== 'mobile' && (
+        <>
+          <ScrollIndicator progress={scrollProgress} />
+          <div className={`
+            fixed right-4 sm:right-8 z-20 flex gap-3 sm:gap-4
+            ${deviceType === 'desktop' ? 'top-1/2 -translate-y-1/2 flex-col' : 'bottom-12 flex-row justify-center w-full right-0'}
+          `}>
+            {SECTIONS.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => scrollToSection(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  currentSection.current === index 
+                    ? 'bg-[#D4AF37] scale-125' 
+                    : 'bg-gray-500 hover:bg-[#B38E3B]'
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

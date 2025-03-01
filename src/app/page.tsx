@@ -5,6 +5,35 @@ import MainContent from "./Components/MainContent";
 import { useState, useEffect } from "react";
 import Info from "./Components/info";
 
+
+function GlobalScrollIndicator() {
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrolled = window.scrollY;
+      const progress = Math.min(scrolled / (documentHeight - windowHeight), 1);
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30">
+      <div className="h-1 w-40 bg-black rounded-full overflow-hidden border border-[#B38E3B]/30">
+        <div 
+          className="h-full bg-gradient-to-r from-[#B38E3B] to-[#D4AF37] transition-all duration-300"
+          style={{ width: `${scrollProgress * 100}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [showContent, setShowContent] = useState(false);
 
@@ -30,6 +59,7 @@ export default function Home() {
           <Info number="24/7" text="Support" icon="phone" />
         </div>
       </div>
+      <GlobalScrollIndicator />
     </div>
   );
 }
