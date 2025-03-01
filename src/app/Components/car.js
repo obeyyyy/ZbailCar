@@ -243,8 +243,11 @@ export default function Car3D() {
   };
 
   useEffect(() => {
-    // Initially lock scroll
-    document.body.style.overflow = 'hidden';
+    // Initially lock scroll only on non-mobile devices
+    if (window.innerWidth >= 640) {
+      document.body.style.overflow = 'hidden';
+    }
+    
     let accumulatedDelta = 0;
     
     const handleWheel = (e) => {
@@ -329,7 +332,8 @@ export default function Car3D() {
     }
 
     return () => {
-      enablePageScroll();
+      // On cleanup, always restore scroll
+      document.body.style.overflow = 'auto';
       if (element) {
         element.removeEventListener('wheel', handleWheel);
         element.removeEventListener('touchstart', handleTouchStart);
