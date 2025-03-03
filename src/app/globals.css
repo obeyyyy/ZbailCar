@@ -102,6 +102,11 @@ body {
     overflow-x: hidden;
     height: auto;
     scroll-behavior: smooth;
+    position: relative;
+  }
+
+  body {
+    overflow-y: visible !important;
   }
 
   .sticky-container {
