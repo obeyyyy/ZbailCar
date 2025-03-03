@@ -526,7 +526,7 @@ export default function Car3D() {
   // Simplified mobile view
   if (deviceType === 'mobile') {
     return (
-      <div className="relative h-[5vh] w-screen bg-black"> {/* Changed to relative */}
+      <div className="relative h-[0vh] w-[0vh]bg-black "> {/* Changed to relative */}
         {/* Car Canvas Container */}
         <div className="sticky top-0 w-full h-[60vh] z-10"> {/* Changed to sticky */}
           <Canvas
