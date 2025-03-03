@@ -93,6 +93,15 @@ body {
     height: 100vh;
     height: calc(var(--vh, 1vh) * 100);
   }
+
+  .touch-pan-y {
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .touch-none {
+    touch-action: none;
+  }
 }
 
 /* Mobile-specific adjustments */
@@ -122,6 +131,18 @@ body {
     top: 0;
     left: 0;
     right: 0;
+  }
+
+  .space-y-24 > * {
+    margin-top: 6rem;
+    margin-bottom: 6rem;
+    scroll-snap-align: start;
+  }
+
+  .space-y-24 {
+    scroll-snap-type: y mandatory;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

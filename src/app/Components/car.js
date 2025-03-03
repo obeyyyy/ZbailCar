@@ -557,18 +557,18 @@ export default function Car3D() {
 
         {/* Content Container */}
         <div className="relative w-full bg-black z-20"> {/* Removed margin-top, added z-index */}
-          <div className="w-full py-12 space-y-24">
+          <div className="w-full py-12 space-y-24 touch-pan-y"> {/* Added touch-pan-y */}
             {SECTIONS.map((section, index) => (
               <div 
                 key={index}
-                className="
+                className={`
                   relative w-full max-w-[90%] mx-auto
                   p-6 rounded-lg
                   bg-black/40
                   backdrop-blur-md
                   shadow-lg shadow-[#B38E3B]/5
-                  transform hover:-translate-y-1
                   transition-all duration-500 ease-out
+                  overflow-hidden
                   before:absolute before:inset-0
                   before:p-[2px]
                   before:rounded-lg
@@ -580,7 +580,12 @@ export default function Car3D() {
                   before:animate-borderGlow
                   after:absolute after:inset-[1px]
                   after:rounded-lg after:bg-black
-                "
+                  touch-none /* Prevent touch interference */
+                  ${!animating.current ? 'hover:-translate-y-1' : ''} /* Only apply hover when not animating */
+                `}
+                style={{
+                  pointerEvents: animating.current ? 'none' : 'auto'
+                }}
               >
                 {/* Decorative elements */}
                 <div className="
