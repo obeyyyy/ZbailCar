@@ -8,11 +8,21 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+      animation: {
+        borderGlow: 'borderGlow 3s linear infinite',
+        shimmer: 'shimmer 2s linear infinite',
       },
-    },
+      keyframes: {
+        borderGlow: {
+          '0%, 100%': { transform: 'translateX(-100%)' },
+          '50%': { transform: 'translateX(100%)' }
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' }
+        }
+      }
+    }
   },
   plugins: [],
 } satisfies Config;

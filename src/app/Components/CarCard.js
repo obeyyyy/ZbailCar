@@ -9,7 +9,7 @@ const Image = dynamic(() => import('next/image'), {
 export default function CarCard({ car }) {
   const [imageLoading, setImageLoading] = useState(true)
 
-  const formatPrice = (price) => `$${price.toFixed(0)}/day`;
+  const formatPrice = (price) => `${price.toFixed(0)} MAD / day`;
 
   const handleBookNow = () => {
     const message = encodeURIComponent(

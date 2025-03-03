@@ -10,13 +10,13 @@ const SECTIONS = [
     progress: 0, 
     duration: 1000,
     carPosition: {
-      mobile: { x: 0.01, y: 0.07, z: 4.7 },     // Moved back and slightly down for better mobile view
-      tablet: { x: 0, y: 0, z: 4.7 },     // Adjusted for tablet
+      mobile: { x: 0, y: -0.2, z: 2.2 },     // Updated to match working static position
+      tablet: { x: 0, y: 0, z: 4.7 },
       desktop: { x: 0.05, y: 0.02, z: 4.85 }
     },
     carRotation: {
-      mobile: { x: 0.3, y: -0.5, z: 0 },   // Slight front view for mobile
-      tablet: { x: 0.2, y: 0.2, z: 0 },    // Adjusted angle for tablet
+      mobile: { x: 0.2, y: -0.3, z: 0 },        // Updated to match working static rotation
+      tablet: { x: 0.2, y: 0.2, z: 0 },
       desktop: { x: 0.2, y: 1.5, z: 0 }
     },
     text: {
@@ -134,15 +134,57 @@ function CarModel({ scrollProgress, deviceType }) {
   return <primitive ref={group} object={scene} castShadow receiveShadow />;
 }
 
+// Update StaticCarModel to include rotation animation
+function StaticCarModel({ deviceType }) {
+  const group = useRef()
+  const { scene } = useGLTF('/models/2022_abt_audi_rs7-r.glb')
+  
+  // Add rotation animation using useFrame
+  useFrame((state) => {
+    if (group.current && deviceType === 'mobile') {
+      // Slow rotation around Y axis
+      group.current.rotation.y += 0.003; // Adjust speed by changing this value
+    }
+  });
+  
+  useEffect(() => {
+    if (group.current) {
+      if (deviceType === 'mobile') {
+        // Initial position and scale
+        group.current.position.set(0, -0.2, 2.2);
+        group.current.rotation.set(0.2, -0.3, 0);
+        group.current.scale.set(5.5, 5.5, 5.5);
+      } else {
+        const initialSection = SECTIONS[0];
+        group.current.position.set(
+          initialSection.carPosition[deviceType].x,
+          initialSection.carPosition[deviceType].y,
+          initialSection.carPosition[deviceType].z
+        );
+        group.current.rotation.set(
+          initialSection.carRotation[deviceType].x,
+          initialSection.carRotation[deviceType].y,
+          initialSection.carRotation[deviceType].z
+        );
+        const scale = deviceType === 'tablet' ? 2.8 : 2.5;
+        group.current.scale.set(scale, scale, scale);
+      }
+    }
+  }, [deviceType]);
+
+  return <primitive ref={group} object={scene} castShadow receiveShadow />;
+}
+
 // Helper function for smooth interpolation
 function lerp(start, end, t) {
   return start * (1 - t) + end * t;
 }
 
-function ScrollIndicator({ progress }) {
+// Update ScrollIndicator component to accept custom styles and visibility control
+function ScrollIndicator({ progress, className, style }) {
   return (
-    <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30">
-      <div className="h-1 w-40 bg-black rounded-full overflow-hidden border border-[#B38E3B]/30">
+    <div className={`fixed left-1/2 transform -translate-x-1/2 z-30 ${className}`} style={style}>
+      <div className="h-1 w-40 bg-black/20 rounded-full overflow-hidden border border-[#B38E3B]/30">
         <div 
           className="h-full bg-gradient-to-r from-[#B38E3B] to-[#D4AF37] transition-all duration-300"
           style={{ width: `${progress * 100}%` }}
@@ -158,9 +200,12 @@ export default function Car3D() {
   const animating = useRef(false)
   const currentSection = useRef(0)
   const lastScrollTime = useRef(Date.now())
-  const scrollThreshold = 50 // Minimum scroll amount to trigger section change
+  const scrollThreshold = 60 // Minimum scroll amount to trigger section change
   const scrollCooldown = 800 // Milliseconds to wait between scroll actions
   const [deviceType, setDeviceType] = useState('desktop')
+
+  // Add scroll progress state for mobile
+  const [mobileScrollProgress, setMobileScrollProgress] = useState(0);
 
   const enablePageScroll = () => {
     if (containerRef.current) {
@@ -463,7 +508,134 @@ export default function Car3D() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Modify the container height for mobile
+  // Add scroll handler for mobile view
+  useEffect(() => {
+    if (deviceType === 'mobile') {
+      const handleScroll = () => {
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = window.scrollY;
+        const progress = Math.min(scrolled / scrollHeight, 1);
+        setMobileScrollProgress(progress);
+      };
+
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
+  }, [deviceType]);
+
+  // Simplified mobile view
+  if (deviceType === 'mobile') {
+    return (
+      <div className="min-h-screen w-screen bg-black">
+        {/* Static 3D Car Canvas */}
+        <div className="absolute w-full h-[60vh] z-0"> {/* Increased height */}
+          <Canvas
+            shadows="soft"
+            dpr={[1, 2]}
+            performance={{ min: 0.5 }}
+            gl={{ powerPreference: "high-performance", antialias: false }}
+            camera={{
+              position: [0, -0.2, 3.0], // Adjusted position for mobile
+              
+              fov: 17, // Reduced FOV for closer view
+              near: 0.1,
+              far: 90
+            }}
+          >
+            <color attach="background" args={['#000000']} />
+            <Suspense fallback={null}>
+              <StaticCarModel deviceType={deviceType} />
+              <Environment preset="forest" />
+              <AccumulativeShadows temporal frames={20} alphaTest={0.85} opacity={0.4} color="#B38E3B">
+                <RandomizedLight amount={3} radius={4} ambient={0.5} intensity={0.8} position={[5, 5, -10]} bias={0.001} />
+              </AccumulativeShadows>
+              <EffectComposer>
+                <Bloom luminanceThreshold={0.4} intensity={0.6} radius={0.5} mipmapBlur={false} />
+              </EffectComposer>
+            </Suspense>
+          </Canvas>
+        </div>
+
+        {/* Content Sections */}
+        <div className="relative pt-[50dvh] w-full">
+          <div className="w-full py-12 space-y-24">
+            {SECTIONS.map((section, index) => (
+              <div 
+                key={index}
+                className="
+                  relative w-full max-w-[90%] mx-auto
+                  p-6 rounded-lg
+                  bg-black/40
+                  backdrop-blur-md
+                  shadow-lg shadow-[#B38E3B]/5
+                  hover:shadow-[#D4AF37]/10
+                  transform hover:-translate-y-1
+                  transition-all duration-500 ease-out
+                  overflow-hidden
+                  before:absolute before:inset-0
+                  before:p-[2px]
+                  before:rounded-lg
+                  before:content-['']
+                  before:bg-gradient-to-r
+                  before:from-transparent
+                  before:via-[#D4AF37]
+                  before:to-transparent
+                  before:animate-borderGlow
+                  after:absolute after:inset-[1px]
+                  after:rounded-lg after:bg-black
+                "
+              >
+                {/* Decorative elements */}
+                <div className="
+                  absolute -inset-[1px] 
+                  bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent
+                  blur-sm
+                  animate-shimmer
+                " />
+                
+                {/* Content container with dark background */}
+                <div className="relative z-10 bg-black/90 rounded-lg p-4">
+                  <div className="relative z-10">
+                    <h2 className="
+                      text-3xl font-bold text-[#D4AF37]
+                      mb-6 tracking-tight
+                      relative inline-block
+                      after:absolute after:-bottom-2 after:left-0
+                      after:w-1/3 after:h-[2px]
+                      after:bg-gradient-to-r after:from-[#B38E3B] after:to-transparent
+                      after:transition-all after:duration-300
+                      group-hover:after:w-full
+                    ">
+                      {section.text.title}
+                    </h2>
+                    <p className="
+                      text-base text-[#B38E3B]/90
+                      pl-4 mt-4
+                      border-l-2 border-[#B38E3B]/20
+                      hover:border-[#D4AF37]/40
+                      transition-colors duration-300
+                      leading-relaxed
+                    ">
+                      {section.text.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* ScrollIndicator */}
+          <ScrollIndicator 
+            progress={mobileScrollProgress}
+            className="bottom-8"
+            style={{ position: 'fixed' }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // Desktop view remains unchanged
   return (
     <div ref={containerRef} className={`
       relative

@@ -46,17 +46,20 @@ function GlobalScrollIndicator() {
 }
 
 export default function Home() {
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(true); // Set default to true
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
 
   useEffect(() => {
-    const handleCarComplete = () => {
-      // Add a small delay before showing content
-      setTimeout(() => setShowContent(true), 300);
-    };
+    if (!isMobile) {
+      // Only use animation completion handler for desktop
+      const handleCarComplete = () => {
+        setTimeout(() => setShowContent(true), 300);
+      };
 
-    window.addEventListener('carAnimationComplete', handleCarComplete);
-    return () => window.removeEventListener('carAnimationComplete', handleCarComplete);
-  }, []);
+      window.addEventListener('carAnimationComplete', handleCarComplete);
+      return () => window.removeEventListener('carAnimationComplete', handleCarComplete);
+    }
+  }, [isMobile]);
 
   return (
     <div className="bg-black min-h-dynamic w-screen overflow-x-hidden">
