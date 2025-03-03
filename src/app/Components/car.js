@@ -528,7 +528,7 @@ export default function Car3D() {
     return (
       <div className="min-h-screen w-screen bg-black">
         {/* Static 3D Car Canvas */}
-        <div className="absolute w-full h-[60vh] z-0"> {/* Increased height */}
+        <div className="fixed top-0 left-0 w-full h-[50vh]"> {/* Changed from absolute to fixed */}
           <Canvas
             shadows="soft"
             dpr={[1, 2]}
@@ -557,7 +557,7 @@ export default function Car3D() {
         </div>
 
         {/* Content Sections */}
-        <div className="relative pt-[50dvh] w-full">
+        <div className="relative mt-[50vh] w-full min-h-[50vh] bg-black"> {/* Added min-height */}
           <div className="w-full py-12 space-y-24">
             {SECTIONS.map((section, index) => (
               <div 

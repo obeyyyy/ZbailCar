@@ -97,13 +97,18 @@ body {
 
 /* Mobile-specific adjustments */
 @media (max-width: 640px) {
-  .canvas-container {
-    height: 100%;
-  }
-  
   body {
+    overflow-y: auto !important; /* Force enable scrolling */
     overflow-x: hidden;
-    overflow-y: scroll;
+    position: relative;
+  }
+
+  .canvas-container {
+    position: fixed;
+    height: 50vh;
+    top: 0;
+    left: 0;
+    right: 0;
   }
 }
 
