@@ -557,7 +557,7 @@ export default function Car3D() {
 
         {/* Content Container */}
         <div className="relative w-full bg-black z-20 "> {/* Removed margin-top, added z-index */}
-          <div className="w-full  py-12 space-y-24 touch-pan-y"> {/* Added touch-pan-y */}
+          <div className="w-full  py-12 space-y-24 overflow-y-auto"> {/* Added overflow-y-auto */}
             {SECTIONS.map((section, index) => (
               <div 
                 key={index}
@@ -580,7 +580,7 @@ export default function Car3D() {
                   before:animate-borderGlow
                   after:absolute after:inset-[1px]
                   after:rounded-lg after:bg-black
-                  touch-none /* Prevent touch interference */
+                  touch-pan-y /* Changed from touch-none to touch-pan-y */
                 `}
                 style={{
                   pointerEvents: animating.current ? 'none' : 'auto'

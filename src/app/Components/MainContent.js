@@ -12,7 +12,7 @@ export default function MainContent({ isVisible }) {
       className={`
         bg-black
         transition-all duration-1000
-        ${isMobile ? ' relative mt-[200vh]' : 'lg:mt-[55dvh] md:mt-[30dvh]'} // Increased margin-top for mobile
+        ${isMobile ? 'relative mt-[200vh]' : 'lg:mt-[55dvh] md:mt-[30dvh]'} for mobile
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-24'}
       `}
       style={{ 
