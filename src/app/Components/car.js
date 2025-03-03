@@ -638,7 +638,6 @@ export default function Car3D() {
   return (
     <div ref={containerRef} className={`
       relative
-      relative
       ${deviceType === 'mobile' ? 'h-[150dvh]' : deviceType === 'tablet' ? 'h-[160dvh]' : 'h-[120vh]'}
       w-screen max-w-[100vw]
     `}>
