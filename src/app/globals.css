@@ -97,16 +97,11 @@ body {
 
 /* Mobile-specific adjustments */
 @media (max-width: 640px) {
-  body {
-    overflow-y: visible !important;
+  html, body {
+    overflow-y: auto !important;
     overflow-x: hidden;
     height: auto;
-    min-height: 100vh;
-  }
-
-  html {
-    height: auto;
-    overflow-y: visible;
+    scroll-behavior: smooth;
   }
 
   .sticky-container {
@@ -114,6 +109,14 @@ body {
     top: 0;
     height: 60vh;
     z-index: 10;
+  }
+
+  .sticky-canvas {
+    position: sticky;
+    top: 0;
+    height: 60vh;
+    z-index: 10;
+    background-color: black;
   }
 
   .canvas-container {
