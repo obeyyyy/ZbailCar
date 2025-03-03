@@ -528,7 +528,7 @@ export default function Car3D() {
     return (
       <div className="relative h-[0vh]  "> {/* Changed to relative */}
         {/* Car Canvas Container */}
-        <div className="sticky top-0 w-full h-[60vh] z-10"> {/* Changed to sticky */}
+        <div className="sticky top-0 w-full h-[40vh] z-10"> {/* Changed to sticky */}
           <Canvas
             shadows="soft"
             dpr={[1, 2]}
@@ -556,8 +556,8 @@ export default function Car3D() {
         </div>
 
         {/* Content Container */}
-        <div className="relative w-full bg-black z-20"> {/* Removed margin-top, added z-index */}
-          <div className="w-full py-12 space-y-24 touch-pan-y"> {/* Added touch-pan-y */}
+        <div className="relative w-full bg-black z-20 "> {/* Removed margin-top, added z-index */}
+          <div className="w-full  py-12 space-y-24 touch-pan-y"> {/* Added touch-pan-y */}
             {SECTIONS.map((section, index) => (
               <div 
                 key={index}
@@ -581,7 +581,6 @@ export default function Car3D() {
                   after:absolute after:inset-[1px]
                   after:rounded-lg after:bg-black
                   touch-none /* Prevent touch interference */
-                  ${!animating.current ? 'hover:-translate-y-1' : ''} /* Only apply hover when not animating */
                 `}
                 style={{
                   pointerEvents: animating.current ? 'none' : 'auto'
@@ -602,11 +601,6 @@ export default function Car3D() {
                       text-3xl font-bold text-[#D4AF37]
                       mb-6 tracking-tight
                       relative inline-block
-                      after:absolute after:-bottom-2 after:left-0
-                      after:w-1/3 after:h-[2px]
-                      after:bg-gradient-to-r after:from-[#B38E3B] after:to-transparent
-                      after:transition-all after:duration-300
-                      group-hover:after:w-full
                     ">
                       {section.text.title}
                     </h2>
@@ -614,8 +608,6 @@ export default function Car3D() {
                       text-base text-[#B38E3B]/90
                       pl-4 mt-4
                       border-l-2 border-[#B38E3B]/20
-                      hover:border-[#D4AF37]/40
-                      transition-colors duration-300
                       leading-relaxed
                     ">
                       {section.text.description}
