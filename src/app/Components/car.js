@@ -526,7 +526,7 @@ export default function Car3D() {
   // Simplified mobile view
   if (deviceType === 'mobile') {
     return (
-      <div className="relative h-[0vh] w-[0vh]bg-black "> {/* Changed to relative */}
+      <div className="relative h-[0vh]  "> {/* Changed to relative */}
         {/* Car Canvas Container */}
         <div className="sticky top-0 w-full h-[60vh] z-10"> {/* Changed to sticky */}
           <Canvas
@@ -567,10 +567,8 @@ export default function Car3D() {
                   bg-black/40
                   backdrop-blur-md
                   shadow-lg shadow-[#B38E3B]/5
-                  hover:shadow-[#D4AF37]/10
                   transform hover:-translate-y-1
                   transition-all duration-500 ease-out
-                  overflow-hidden
                   before:absolute before:inset-0
                   before:p-[2px]
                   before:rounded-lg
