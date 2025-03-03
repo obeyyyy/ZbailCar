@@ -98,9 +98,22 @@ body {
 /* Mobile-specific adjustments */
 @media (max-width: 640px) {
   body {
-    overflow-y: auto !important; /* Force enable scrolling */
+    overflow-y: visible !important;
     overflow-x: hidden;
-    position: relative;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  html {
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .sticky-container {
+    position: sticky;
+    top: 0;
+    height: 60vh;
+    z-index: 10;
   }
 
   .canvas-container {

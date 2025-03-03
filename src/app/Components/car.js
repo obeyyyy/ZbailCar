@@ -526,18 +526,17 @@ export default function Car3D() {
   // Simplified mobile view
   if (deviceType === 'mobile') {
     return (
-      <div className="min-h-screen w-screen bg-black">
-        {/* Static 3D Car Canvas */}
-        <div className="fixed top-0 left-0 w-full h-[50vh]"> {/* Changed from absolute to fixed */}
+      <div className="relative min-h-screen w-screen bg-black"> {/* Changed to relative */}
+        {/* Car Canvas Container */}
+        <div className="sticky top-0 w-full h-[60vh] z-10"> {/* Changed to sticky */}
           <Canvas
             shadows="soft"
             dpr={[1, 2]}
             performance={{ min: 0.5 }}
             gl={{ powerPreference: "high-performance", antialias: false }}
             camera={{
-              position: [0, -0.2, 3.0], // Adjusted position for mobile
-              
-              fov: 17, // Reduced FOV for closer view
+              position: [0, -0.2, 3.0],
+              fov: 17,
               near: 0.1,
               far: 90
             }}
@@ -556,8 +555,8 @@ export default function Car3D() {
           </Canvas>
         </div>
 
-        {/* Content Sections */}
-        <div className="relative mt-[50vh] w-full min-h-[50vh] bg-black"> {/* Added min-height */}
+        {/* Content Container */}
+        <div className="relative w-full bg-black z-20"> {/* Removed margin-top, added z-index */}
           <div className="w-full py-12 space-y-24">
             {SECTIONS.map((section, index) => (
               <div 
@@ -628,7 +627,7 @@ export default function Car3D() {
           <ScrollIndicator 
             progress={mobileScrollProgress}
             className="bottom-8"
-            style={{ position: 'fixed' }}
+            style={{ position: 'fixed', zIndex: 30 }}
           />
         </div>
       </div>
@@ -638,6 +637,7 @@ export default function Car3D() {
   // Desktop view remains unchanged
   return (
     <div ref={containerRef} className={`
+      relative
       relative
       ${deviceType === 'mobile' ? 'h-[150dvh]' : deviceType === 'tablet' ? 'h-[160dvh]' : 'h-[120vh]'}
       w-screen max-w-[100vw]
