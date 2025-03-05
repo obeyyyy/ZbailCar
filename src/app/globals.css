@@ -5,6 +5,16 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #FFFFFF;
+  --secondary: #F8F8F8;
+  --accent: #333333;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --gradient-start: rgba(255, 255, 255, 0.9);
+  --gradient-end: rgba(245, 245, 245, 0.9);
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --border-light: #E5E5E5;
+  --border-medium: #D1D1D1;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -15,22 +25,44 @@
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--text-primary);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
   width: 100%;
   margin: 0;
   padding: 0;
+  background: transparent;
+}
+
+body::before {
+  display: none;
+}
+
+main, nav, .content-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  width: 100%;
+  background: transparent;
 }
 
 .canvas-container {
-  position: fixed;
+  position: absolute !important;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: transparent;
+  background: transparent !important;
+  z-index: 1;
+}
+
+canvas {
+  background: transparent !important;
 }
 
 @keyframes fadeInUp {
@@ -44,14 +76,14 @@ body {
   }
 }
 
-/* Add or update shimmer animation */
+/* Update shimmer animation */
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);
     opacity: 0;
   }
   50% {
-    opacity: 1;
+    opacity: 0.3;
   }
   100% {
     transform: translateX(100%);
@@ -63,18 +95,43 @@ body {
   animation: shimmer 3s ease-in-out infinite;
 }
 
-/* Add glow animation */
+/* Update glow animation */
 @keyframes glow {
   0%, 100% {
-    opacity: 0.3;
+    opacity: 0.2;
   }
   50% {
-    opacity: 1;
+    opacity: 0.4;
   }
 }
 
 .animate-glow {
   animation: glow 2s ease-in-out infinite;
+}
+
+/* Add gradient animation */
+@keyframes gradientBackground {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-gradient {
+  background: linear-gradient(
+    -45deg,
+    #ffffff,
+    #f8f9fa,
+    #f3f4f6,
+    #ffffff
+  );
+  background-size: 400% 400%;
+  animation: gradientBackground 15s ease infinite;
 }
 
 /* Add responsive container styles */
@@ -181,6 +238,7 @@ html, body {
   width: 100%;
   margin: 0;
   padding: 0;
+  background: transparent;
 }
 
 /* Add specific Safari mobile fixes */

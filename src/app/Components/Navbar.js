@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export default function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/90 to-black/0 backdrop-blur-sm h-20">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-white/90 to-white/0 backdrop-blur-sm h-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div className="flex items-center justify-between h-full">
           {/* Logo */}
@@ -20,12 +20,12 @@ export default function Navbar() {
 
           {/* Contact Info */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="mailto:contact@zbailcars.com" className="text-[#B38E3B] hover:text-[#D4AF37] transition-colors">
+            <a href="mailto:contact@zbailcars.com" className="text-gray-600 hover:text-gray-800 transition-colors">
               contact@zbailcars.com
             </a>
             <a
               href="/contact"
-              className="inline-flex items-center px-6 py-2 border border-[#B38E3B] text-[#D4AF37] hover:bg-[#B38E3B] hover:text-black rounded-full transition-all"
+              className="inline-flex items-center px-6 py-2 border border-gray-200 text-gray-700 hover:bg-gray-100 hover:border-gray-300 rounded-full transition-all"
             >
               Contact Us
             </a>

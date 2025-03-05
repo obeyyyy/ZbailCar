@@ -151,8 +151,8 @@ function StaticCarModel({ deviceType }) {
     if (group.current) {
       if (deviceType === 'mobile') {
         // Initial position and scale
-        group.current.position.set(0, -0.2, 2.2);
-        group.current.rotation.set(0.2, -0.3, 0);
+        group.current.position.set(0, -0.1, 4.75);
+        group.current.rotation.set(0.2, -0.1, 0);
         group.current.scale.set(5.5, 5.5, 5.5);
       } else {
         const initialSection = SECTIONS[0];
@@ -184,9 +184,9 @@ function lerp(start, end, t) {
 function ScrollIndicator({ progress, className, style }) {
   return (
     <div className={`fixed left-1/2 transform -translate-x-1/2 z-30 ${className}`} style={style}>
-      <div className="h-1 w-40 bg-black/20 rounded-full overflow-hidden border border-[#B38E3B]/30">
+      <div className="h-1 w-40 bg-gray-100 rounded-full overflow-hidden border border-gray-300">
         <div 
-          className="h-full bg-gradient-to-r from-[#B38E3B] to-[#D4AF37] transition-all duration-300"
+          className="h-full bg-gradient-to-r from-gray-400 to-gray-500"
           style={{ width: `${progress * 100}%` }}
         />
       </div>
@@ -526,27 +526,33 @@ export default function Car3D() {
   // Simplified mobile view
   if (deviceType === 'mobile') {
     return (
-      <div className="relative h-[0vh]  "> {/* Changed to relative */}
+      <div className="relative h-[250vh]  "> {/* Changed to relative */}
         {/* Car Canvas Container */}
         <div className="sticky top-0 w-full h-[40vh] z-10"> {/* Changed to sticky */}
           <Canvas
             shadows="soft"
             dpr={[1, 2]}
             performance={{ min: 0.5 }}
-            gl={{ powerPreference: "high-performance", antialias: false }}
-            camera={{
-              position: [0, -0.2, 3.0],
-              fov: 17,
-              near: 0.1,
-              far: 90
+            gl={{ 
+              powerPreference: "high-performance",
+              antialias: true,
+              alpha: true, // Enable alpha
+              clearColor: 'transparent',
+              clearAlpha: 0
+            }}
+            style={{ 
+              background: 'transparent',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              zIndex: 1
             }}
           >
-            <color attach="background" args={['#000000']} />
             <Suspense fallback={null}>
               <StaticCarModel deviceType={deviceType} />
-              <Environment preset="forest" />
+             <Environment preset="forest" /> 
               <AccumulativeShadows temporal frames={20} alphaTest={0.85} opacity={0.4} color="#B38E3B">
-                <RandomizedLight amount={3} radius={4} ambient={0.5} intensity={0.8} position={[5, 5, -10]} bias={0.001} />
+                <RandomizedLight amount={3} radius={4} ambient={0.5} intensity={0.8} position={[5, 5, 2]} bias={0.001} />
               </AccumulativeShadows>
               <EffectComposer>
                 <Bloom luminanceThreshold={0.4} intensity={0.6} radius={0.5} mipmapBlur={false} />
@@ -556,7 +562,7 @@ export default function Car3D() {
         </div>
 
         {/* Content Container */}
-        <div className="relative w-full bg-black z-20 "> {/* Removed margin-top, added z-index */}
+        <div className="relative w-full  z-[20] h-auto "> {/* Removed margin-top, added z-index */}
           <div className="w-full  py-12 space-y-24 overflow-y-auto"> {/* Added overflow-y-auto */}
             {SECTIONS.map((section, index) => (
               <div 
@@ -564,55 +570,75 @@ export default function Car3D() {
                 className={`
                   relative w-full max-w-[90%] mx-auto
                   p-6 rounded-lg
-                  bg-black/40
+                  bg-gradient-to-b from-white/95 to-white/90
                   backdrop-blur-md
-                  shadow-lg shadow-[#B38E3B]/5
+                  shadow-[0_10px_30px_rgba(0,0,0,0.1)]
                   transition-all duration-500 ease-out
                   overflow-hidden
+                  border border-white/50
                   before:absolute before:inset-0
                   before:p-[2px]
                   before:rounded-lg
                   before:content-['']
-                  before:bg-gradient-to-r
-                  before:from-transparent
-                  before:via-[#D4AF37]
-                  before:to-transparent
-                  before:animate-borderGlow
+                  before:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,transparent_100%)]
                   after:absolute after:inset-[1px]
-                  after:rounded-lg after:bg-black
-                  touch-pan-y /* Changed from touch-none to touch-pan-y */
+                  after:rounded-lg 
+                  after:bg-gradient-to-br from-white/80 via-white/95 to-white/80
+                  hover:shadow-[0_15px_40px_rgba(0,0,0,0.15)]
+                  hover:scale-[1.02]
+                  group
                 `}
-                style={{
-                  pointerEvents: animating.current ? 'none' : 'auto'
-                }}
               >
-                {/* Decorative elements */}
-                <div className="
-                  absolute -inset-[1px] 
-                  bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent
-                  blur-sm
-                  animate-shimmer
-                " />
+                {/* Add subtle pattern overlay */}
+                <div 
+                  className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                  style={{
+                    backgroundImage: `
+                      repeating-linear-gradient(
+                        -45deg,
+                        #000,
+                        #000 1px,
+                        transparent 1px,
+                        transparent 10px
+                      )
+                    `
+                  }}
+                />
                 
-                {/* Content container with dark background */}
-                <div className="relative z-10 bg-black/90 rounded-lg p-4">
-                  <div className="relative z-10">
-                    <h2 className="
-                      text-3xl font-bold text-[#D4AF37]
-                      mb-6 tracking-tight
-                      relative inline-block
-                    ">
-                      {section.text.title}
-                    </h2>
-                    <p className="
-                      text-base text-[#B38E3B]/90
-                      pl-4 mt-4
-                      border-l-2 border-[#B38E3B]/20
-                      leading-relaxed
-                    ">
-                      {section.text.description}
-                    </p>
-                  </div>
+                {/* Add light effect */}
+                <div className="
+                  absolute -inset-[100%]
+                  bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8),transparent_25%)]
+                  opacity-0
+                  group-hover:opacity-100
+                  transition-opacity duration-1000
+                  pointer-events-none
+                "/>
+
+                {/* Content container */}
+                <div className="relative z-10 p-4">
+                  <h2 className="
+                    text-3xl font-bold text-gray-900
+                    mb-6 tracking-tight
+                    relative inline-block
+                    after:absolute after:bottom-0 after:left-0
+                    after:w-16 after:h-[2px]
+                    after:bg-gradient-to-r after:from-gray-400 after:to-transparent
+                    after:transition-all after:duration-300
+                    group-hover:after:w-full
+                  ">
+                    {section.text.title}
+                  </h2>
+                  <p className="
+                    text-base text-gray-600
+                    pl-4 mt-4
+                    border-l-2 border-gray-200
+                    leading-relaxed
+                    transition-all duration-300
+                    group-hover:border-gray-400
+                  ">
+                    {section.text.description}
+                  </p>
                 </div>
               </div>
             ))}
@@ -632,29 +658,37 @@ export default function Car3D() {
   // Desktop view remains unchanged
   return (
     <div ref={containerRef} className={`
-      relative
+      relative 
       ${deviceType === 'mobile' ? 'h-[150dvh]' : deviceType === 'tablet' ? 'h-[160dvh]' : 'h-[120vh]'}
       w-screen max-w-[100vw]
     `}>
       {/* Canvas with fixed position on mobile */}
-      <div className={`
+      <div class={`
         ${deviceType === 'mobile' ? 'fixed h-[50dvh]' : 'absolute h-full'} 
-        inset-0 w-full z-0
+        inset-0 w-full z-[1] bg-transparent
       `}>
         <Canvas
-  r        shadows="soft"
+          shadows="soft"
           dpr={[1, 2]}
           performance={{ min: 0.5 }}
-          gl={{ powerPreference: "high-performance", antialias: false }}
+          gl={{ 
+            powerPreference: "high-performance",
+            antialias: true,
+            alpha: true, // Enable alpha
+            clearColor: 'transparent',
+            clearAlpha: 0
+          }}
           style={{ 
-            width: '100%', 
-            height: '100%'
+            background: 'transparent',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 1
           }}
         >
-          <color attach="background" args={['#000000']} />
           <Suspense fallback={null}>
             <CarModel scrollProgress={scrollProgress} deviceType={deviceType} />
-            <Environment preset="forest" />
+           <Environment preset="forest" />
           </Suspense>
           <OrbitControls 
             enableZoom={false} 
@@ -664,22 +698,7 @@ export default function Car3D() {
             enableRotate={false}
           />
 
-          <AccumulativeShadows 
-            temporal 
-            frames={20}
-            alphaTest={0.85} 
-            opacity={0.4}
-            color="#B38E3B"
-          >
-            <RandomizedLight 
-              amount={3}
-              radius={4} 
-              ambient={0.5} 
-              intensity={0.8} 
-              position={[5, 5, -10]} 
-              bias={0.001}
-            />
-          </AccumulativeShadows>
+
 
           {/* Reduced bloom effect */}
           <EffectComposer>
@@ -706,7 +725,7 @@ export default function Car3D() {
         `}>
           <div className={`
             w-full flex flex-col
-            ${deviceType === 'mobile' ? 'gap-[15dvh]' : 'gap-[25vh]'}
+            ${deviceType === 'mobile' ? 'gap-[15dvh]' : 'gap-[15vh]'}
             ${deviceType === 'tablet' ? 'gap-[35vh]' : ''}
             ${deviceType === 'mobile' ? 'items-center text-center gap-[20vh]' : ''}
           `}>
@@ -720,11 +739,12 @@ export default function Car3D() {
                     : 'w-full max-w-[90%] sm:max-w-[80%] mx-auto p-4'}
                   ${deviceType !== 'desktop' ? 'text-center' : ''}
                   p-2 backdrop-blur-[2px]
-                  before:absolute before:inset-0 
-                  before:border before:border-[#B38E3B]/10
-                  before:rounded-lg before:-z-10
-                  hover:before:border-[#D4AF37]/30
-                  before:transition-colors before:duration-300
+                  bg-white/80
+                  hover:bg-white/90
+                  rounded-lg
+                  shadow-lg shadow-black/5
+                  hover:shadow-xl hover:shadow-black/10
+                  transition-all duration-300
                 `}
                 style={{ 
                   opacity: getTextOpacity(index),
@@ -732,29 +752,33 @@ export default function Car3D() {
                     deviceType !== 'desktop' && currentSection.current === index 
                       ? '0' 
                       : currentSection.current > index 
-                        ? '-30px' 
-                        : '30px'
+                        ? '-20px' 
+                        : '10px'
                   })`,
-                  transition: 'opacity 0.5s ease, transform 0.5s ease'
+                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
                 <h2 className="
-                  text-2xl sm:text-3xl lg:text-4xl p-4 font-bold text-[#D4AF37] 
+                  text-2xl sm:text-3xl lg:text-4xl 
+                  p-4 font-bold text-gray-900
                   tracking-tight max-w-xl
                   relative 
                   after:absolute after:bottom-0 after:left-0 
                   after:w-16 after:h-[1px]
-                  after:bg-gradient-to-r after:from-[#B38E3B] after:to-transparent
+                  after:bg-gradient-to-r after:from-gray-400 after:to-transparent
                   group-hover:after:w-32
                   after:transition-all after:duration-300
                 ">
                   {section.text.title}
                 </h2>
                 <p className="
-                  text-sm sm:text-base lg:text-lg text-[#B38E3B] max-w-xl
-                  relative pl-4 border-l border-[#B38E3B]/20
-                  group-hover:border-[#B38E3B]/40
-                  transition-colors duration-300
+                  text-sm sm:text-base lg:text-lg 
+                  text-gray-600
+                  max-w-xl
+                  relative pl-4 
+                  border-l border-gray-300
+                  group-hover:border-gray-400
+                  transition-all duration-300
                 ">
                   {section.text.description}
                 </p>
@@ -786,8 +810,8 @@ export default function Car3D() {
             onClick={() => scrollToSection(index)}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
               currentSection.current === index 
-                ? 'bg-[#D4AF37] scale-125' 
-                : 'bg-gray-500 hover:bg-[#B38E3B]'
+                ? 'bg-gray-800 scale-125' 
+                : 'bg-gray-300 hover:bg-gray-400'
             }`}
           />
         ))}
