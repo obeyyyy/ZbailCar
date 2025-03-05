@@ -159,6 +159,11 @@ canvas {
   .touch-none {
     touch-action: none;
   }
+
+  .touch-auto {
+    touch-action: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* Mobile-specific adjustments */
@@ -188,6 +193,7 @@ canvas {
     top: 0;
     left: 0;
     right: 0;
+    pointer-events: none; /* Allow touches to pass through */
   }
 
   .space-y-24 > * {

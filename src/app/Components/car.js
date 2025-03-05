@@ -15,7 +15,7 @@ const SECTIONS = [
       desktop: { x: 0.05, y: 0.02, z: 4.85 }
     },
     carRotation: {
-      mobile: { x: 0.2, y: -0.3, z: 0 },        // Updated to match working static rotation
+      mobile: { x: 0.2, y: 0, z: 0 },        // Updated to match working static rotation
       tablet: { x: 0.2, y: 0.2, z: 0 },
       desktop: { x: 0.2, y: 1.5, z: 0 }
     },
@@ -139,20 +139,14 @@ function StaticCarModel({ deviceType }) {
   const group = useRef()
   const { scene } = useGLTF('/models/2022_abt_audi_rs7-r.glb')
   
-  // Add rotation animation using useFrame
-  useFrame((state) => {
-    if (group.current && deviceType === 'mobile') {
-      // Slow rotation around Y axis
-      group.current.rotation.y += 0.003; // Adjust speed by changing this value
-    }
-  });
   
+
   useEffect(() => {
     if (group.current) {
       if (deviceType === 'mobile') {
         // Initial position and scale
-        group.current.position.set(0, -0.1, 4.75);
-        group.current.rotation.set(0.2, -0.1, 0);
+        group.current.position.set(0.0, -0.07, 4.79);
+        group.current.rotation.set(0, 1.5, 0);
         group.current.scale.set(5.5, 5.5, 5.5);
       } else {
         const initialSection = SECTIONS[0];
@@ -526,39 +520,42 @@ export default function Car3D() {
   // Simplified mobile view
   if (deviceType === 'mobile') {
     return (
-      <div className="relative h-[250vh]  "> {/* Changed to relative */}
+      <div className="relative h-[250vh] touch-auto"> {/* Added touch-auto */}
         {/* Car Canvas Container */}
-        <div className="sticky top-0 w-full h-[40vh] z-10"> {/* Changed to sticky */}
-          <Canvas
-            shadows="soft"
-            dpr={[1, 2]}
-            performance={{ min: 0.5 }}
-            gl={{ 
-              powerPreference: "high-performance",
-              antialias: true,
-              alpha: true, // Enable alpha
-              clearColor: 'transparent',
-              clearAlpha: 0
-            }}
-            style={{ 
-              background: 'transparent',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              zIndex: 1
-            }}
-          >
-            <Suspense fallback={null}>
-              <StaticCarModel deviceType={deviceType} />
-             <Environment preset="forest" /> 
-              <AccumulativeShadows temporal frames={20} alphaTest={0.85} opacity={0.4} color="#B38E3B">
-                <RandomizedLight amount={3} radius={4} ambient={0.5} intensity={0.8} position={[5, 5, 2]} bias={0.001} />
-              </AccumulativeShadows>
-              <EffectComposer>
-                <Bloom luminanceThreshold={0.4} intensity={0.6} radius={0.5} mipmapBlur={false} />
-              </EffectComposer>
-            </Suspense>
-          </Canvas>
+        <div className="sticky top-0 w-full h-[40vh] z-10 touch-none"> {/* Added touch-none */}
+          <div className="absolute inset-0 touch-auto" style={{ pointerEvents: 'none' }}> {/* Add this wrapper */}
+            <Canvas
+              shadows="soft"
+              dpr={[1, 2]}
+              performance={{ min: 0.5 }}
+              gl={{ 
+                powerPreference: "high-performance",
+                antialias: true,
+                alpha: true, // Enable alpha
+                clearColor: 'transparent',
+                clearAlpha: 0
+              }}
+              style={{ 
+                background: 'transparent',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 1,
+                touchAction: 'auto' // Enable touch events to pass through
+              }}
+            >
+              <Suspense fallback={null}>
+                <StaticCarModel deviceType={deviceType} />
+               <Environment preset="forest" /> 
+                <AccumulativeShadows temporal frames={20} alphaTest={0.85} opacity={0.4} color="#B38E3B">
+                  <RandomizedLight amount={3} radius={4} ambient={0.5} intensity={0.8} position={[5, 5, 2]} bias={0.001} />
+                </AccumulativeShadows>
+                <EffectComposer>
+                  <Bloom luminanceThreshold={0.4} intensity={0.6} radius={0.5} mipmapBlur={false} />
+                </EffectComposer>
+              </Suspense>
+            </Canvas>
+          </div>
         </div>
 
         {/* Content Container */}

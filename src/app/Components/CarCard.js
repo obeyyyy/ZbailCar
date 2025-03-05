@@ -18,15 +18,17 @@ export default function CarCard({ car }) {
     window.open(`https://wa.me/1234567890?text=${message}`, '_blank');
   };
 
+  // Add device detection
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+
   return (
-    <div className="
-      group
+    <div className={`
       relative
       backdrop-blur-md rounded-2xl
       overflow-hidden
       transition-all duration-500
-      hover:-translate-y-1
-    ">
+      ${!isMobile && 'group hover:-translate-y-1'} // Only apply hover effect on desktop
+    `}>
       {/* Layered Background */}
       <div className="absolute inset-0">
         {/* Base layer with gradient */}
@@ -67,7 +69,11 @@ export default function CarCard({ car }) {
       </div>
 
       {/* Main content container */}
-      <div className="relative shadow-[0_8px_20px_rgba(212,175,55,0.07)] group-hover:shadow-[0_15px_30px_rgba(212,175,55,0.15)]">
+      <div className={`
+        relative 
+        shadow-[0_8px_20px_rgba(212,175,55,0.07)]
+        ${!isMobile && 'group-hover:shadow-[0_15px_30px_rgba(212,175,55,0.15)]'}
+      `}>
         {/* Image Container */}
         <div className="relative h-48 w-full overflow-hidden">
           {imageLoading && (
